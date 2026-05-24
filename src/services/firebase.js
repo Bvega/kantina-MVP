@@ -1,6 +1,7 @@
 // src/services/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,5 +13,24 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const isFirebaseConfigured = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== "undefined";
+
+let app;
+let authInstance;
+let dbInstance;
+
+if (isFirebaseConfigured) {
+  app = initializeApp(firebaseConfig);
+  authInstance = getAuth(app);
+  dbInstance = getFirestore(app);
+} else {
+  console.warn("⚠️ Firebase environment variables are missing. Application will run using Mock Data services.");
+  app = null;
+  authInstance = null;
+  dbInstance = null;
+}
+
+export const auth = authInstance;
+export const db = dbInstance;
+export { isFirebaseConfigured };
+
