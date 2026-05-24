@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { subscribeToOrder } from '../services/orders';
+import { useAuth } from '../context/AuthContext';
 import { 
   Clock, 
   ChefHat, 
@@ -19,6 +20,7 @@ export default function OrderStatus() {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth() || {};
 
   useEffect(() => {
     const unsubscribe = subscribeToOrder(orderId, (updatedOrder) => {
@@ -82,6 +84,11 @@ export default function OrderStatus() {
         
         {/* Top Header Card */}
         <div className="text-center border-b border-gray-100 pb-5">
+          {order && (
+            <Link to={`/menu/${order.vendorId}`} className="text-xs font-bold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1 mb-2">
+              ← Volver al Menú
+            </Link>
+          )}
           <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider">Seguimiento de Pedido</span>
           <h2 className="text-xl font-bold text-gray-900 mt-1">Orden #{id}</h2>
           <p className="text-sm font-semibold text-gray-600 mt-0.5">Cliente: {customerName}</p>
@@ -176,7 +183,12 @@ export default function OrderStatus() {
 
         {/* Support helper */}
         <div className="text-center text-[10px] text-gray-400 font-semibold bg-gray-50 rounded-xl p-3 border border-gray-100">
-          📍 Por favor, no cierres esta pestaña. Se actualizará sola cuando tu comida esté lista.
+          <div>📍 Por favor, no cierres esta pestaña. Se actualizará sola cuando tu comida esté lista.</div>
+          {user && (
+            <Link to="/dashboard" className="mt-2 pt-2 border-t border-gray-100 block text-xs font-bold text-orange-600 hover:text-orange-700">
+              Ir al Dashboard de Vendedor →
+            </Link>
+          )}
         </div>
 
       </div>

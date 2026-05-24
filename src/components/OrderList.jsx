@@ -6,9 +6,19 @@ import { Sparkles, HelpCircle, Utensils, BellRing } from 'lucide-react';
  * OrderList groups active orders into columns based on their state (pending, preparing, ready).
  */
 export default function OrderList({ orders, onStatusUpdate }) {
-  const pendingOrders = orders.filter((o) => o.status === 'pending');
-  const preparingOrders = orders.filter((o) => o.status === 'preparing');
-  const readyOrders = orders.filter((o) => o.status === 'ready');
+  // Sort pending orders newest first so new orders appear at the very top of the list
+  const pendingOrders = orders
+    .filter((o) => o.status === 'pending')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Sort preparing and ready orders oldest first so vendors cook in order of arrival
+  const preparingOrders = orders
+    .filter((o) => o.status === 'preparing')
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  const readyOrders = orders
+    .filter((o) => o.status === 'ready')
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const columns = [
     {
@@ -43,7 +53,7 @@ export default function OrderList({ orders, onStatusUpdate }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {columns.map((col, idx) => (
-        <div key={idx} className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex flex-col min-h-[500px]">
+        <div key={idx} className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex flex-col min-h-[350px]">
           {/* Column Header */}
           <div className={`flex justify-between items-center pb-3 mb-4 border-b-2 ${col.accent}`}>
             <h2 className="text-base font-bold flex items-center">
@@ -55,8 +65,8 @@ export default function OrderList({ orders, onStatusUpdate }) {
             </span>
           </div>
 
-          {/* Orders Column Body */}
-          <div className="flex-1 space-y-4 overflow-y-auto max-h-[700px] scrollbar-thin">
+          {/* Orders Column Body with responsive height limits */}
+          <div className="flex-1 space-y-4 overflow-y-auto max-h-[calc(100vh-320px)] scrollbar-thin">
             {col.list.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full min-h-[250px] border border-dashed border-gray-200 rounded-xl bg-white/40 p-6 text-center">
                 {col.emptyIcon}
