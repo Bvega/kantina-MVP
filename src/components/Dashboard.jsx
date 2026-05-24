@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   subscribeToActiveOrders, 
@@ -11,6 +11,7 @@ import {
 import OrderList from './OrderList';
 import MenuEditor from './MenuEditor';
 import QRCodeCard from './QRCodeCard';
+import { playNewOrderChime } from '../utils/audio';
 import { 
   LogOut, 
   ClipboardList, 
@@ -20,7 +21,8 @@ import {
   PlusCircle, 
   User, 
   Sparkles, 
-  DollarSign 
+  DollarSign,
+  Volume2
 } from 'lucide-react';
 
 /**
@@ -62,6 +64,59 @@ export default function Dashboard() {
     }
     loadMenu();
   }, [vendorId]);
+
+  // Refs to track order IDs to prevent duplicate chime sounds
+  const seenOrderIdsRef = useRef(new Set());
+  const isFirstRenderRef = useRef(true);
+
+  // Play chime sound when a new pending order arrives
+  useEffect(() => {
+    if (activeOrders.length === 0) return;
+    
+    const currentIds = activeOrders.map(o => o.id);
+    
+    if (isFirstRenderRef.current) {
+      // Skip chime for orders that are already active on initial dashboard mount
+      currentIds.forEach(id => seenOrderIdsRef.current.add(id));
+      isFirstRenderRef.current = false;
+      return;
+    }
+
+    let hasNewPending = false;
+    activeOrders.forEach(order => {
+      if (order.status === 'pending' && !seenOrderIdsRef.current.has(order.id)) {
+        hasNewPending = true;
+        seenOrderIdsRef.current.add(order.id);
+      }
+    });
+
+    if (hasNewPending) {
+      playNewOrderChime();
+    }
+  }, [activeOrders]);
+
+  // Flash document title when there are active pending orders
+  useEffect(() => {
+    const pendingCount = activeOrders.filter(o => o.status === 'pending').length;
+    
+    if (pendingCount === 0) {
+      document.title = 'Kantina Panel';
+      return;
+    }
+
+    let isFlashed = false;
+    const interval = setInterval(() => {
+      document.title = isFlashed 
+        ? `🔔 (${pendingCount}) ¡Nuevo Pedido!` 
+        : 'Kantina Panel';
+      isFlashed = !isFlashed;
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      document.title = 'Kantina Panel';
+    };
+  }, [activeOrders]);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     const result = await updateOrderStatus(orderId, newStatus);
@@ -168,6 +223,16 @@ export default function Dashboard() {
                 <User className="w-3.5 h-3.5 text-gray-400" />
                 <span>{user?.email}</span>
               </div>
+
+              {/* Sound Test Button */}
+              <button
+                onClick={playNewOrderChime}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-orange-100 hover:bg-orange-50 text-orange-600 rounded-lg text-xs font-bold transition-colors"
+                title="Probar sonido de notificación"
+              >
+                <Volume2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Probar Sonido</span>
+              </button>
 
               {/* Logout Button */}
               <button
