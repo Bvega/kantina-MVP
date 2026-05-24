@@ -279,3 +279,38 @@ export async function createOrder(vendorId, orderData) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Listen to updates on a single order in real-time.
+ * @param {string} orderId 
+ * @param {Function} callback Called with the updated order object or null if not found
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeToOrder(orderId, callback) {
+  if (!isFirebaseConfigured) {
+    initializeMockLocalStorage();
+    
+    const emitOrder = () => {
+      const allOrders = JSON.parse(localStorage.getItem(MOCK_ORDERS_KEY)) || [];
+      const order = allOrders.find(o => o.id === orderId);
+      callback(order || null);
+    };
+
+    emitOrder();
+    
+    const handler = () => emitOrder();
+    window.addEventListener("kantina_mock_orders_change", handler);
+    return () => window.removeEventListener("kantina_mock_orders_change", handler);
+  }
+
+  const docRef = doc(db, 'orders', orderId);
+  return onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() });
+    } else {
+      callback(null);
+    }
+  }, (error) => {
+    console.error("Error in single order snapshot:", error);
+  });
+}
