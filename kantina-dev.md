@@ -1,5 +1,11 @@
 # Kantina MVP - Development Handover & Project Status
 
+> [!IMPORTANT]
+> ### 🤖 Prompt for Incoming AI Assistant (Copy & Paste to Start)
+> *"I have just loaded the Kantina MVP codebase. Please begin by opening and reading [kantina-dev.md](file:///c:/Users/boliv/Desktop/Kantina/kantina-mvp/kantina-dev.md) in full. This will walk you through the React+Vite+Tailwind file structure, the dual-mode Firebase/localStorage mock synchronization engine, and the development commands. After reading, look at the 'Next Steps' backlog at the bottom of the file to see what to build next. Make sure to preserve the mock fallbacks so the app remains testable without active Firebase keys."*
+
+---
+
 This document serves as a complete catch-up guide for any developer or AI assistant resuming development of the Kantina MVP.
 
 ---
