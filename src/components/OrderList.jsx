@@ -1,11 +1,14 @@
 import React from 'react';
 import OrderCard from './OrderCard';
+import { useLanguage } from '../context/LanguageContext';
 import { Sparkles, HelpCircle, Utensils, BellRing } from 'lucide-react';
 
 /**
  * OrderList groups active orders into columns based on their state (pending, preparing, ready).
  */
 export default function OrderList({ orders, onStatusUpdate }) {
+  const { t } = useLanguage();
+
   // Sort pending orders newest first so new orders appear at the very top of the list
   const pendingOrders = orders
     .filter((o) => o.status === 'pending')
@@ -22,30 +25,30 @@ export default function OrderList({ orders, onStatusUpdate }) {
 
   const columns = [
     {
-      title: 'Por Confirmar',
+      title: t('col_pending'),
       accent: 'border-amber-500 text-amber-800',
       countBg: 'bg-amber-100 text-amber-800',
       list: pendingOrders,
       icon: <BellRing className="w-5 h-5 mr-2" />,
-      emptyMessage: 'Sin pedidos nuevos',
+      emptyMessage: t('col_pending_empty'),
       emptyIcon: <HelpCircle className="w-8 h-8 text-amber-300 mb-2" />
     },
     {
-      title: 'En Cocina',
+      title: t('col_preparing'),
       accent: 'border-blue-500 text-blue-800',
       countBg: 'bg-blue-100 text-blue-800',
       list: preparingOrders,
       icon: <Utensils className="w-5 h-5 mr-2" />,
-      emptyMessage: 'Cocina despejada',
+      emptyMessage: t('col_preparing_empty'),
       emptyIcon: <Sparkles className="w-8 h-8 text-blue-300 mb-2" />
     },
     {
-      title: 'Listo para Entrega',
+      title: t('col_ready'),
       accent: 'border-emerald-500 text-emerald-800',
       countBg: 'bg-emerald-100 text-emerald-800',
       list: readyOrders,
       icon: <BellRing className="w-5 h-5 mr-2" />, // Or another icon like PackageCheck
-      emptyMessage: 'Nada listo para recoger',
+      emptyMessage: t('col_ready_empty'),
       emptyIcon: <BellRing className="w-8 h-8 text-emerald-300 mb-2" />
     }
   ];
@@ -71,7 +74,7 @@ export default function OrderList({ orders, onStatusUpdate }) {
               <div className="flex flex-col items-center justify-center h-full min-h-[250px] border border-dashed border-gray-200 rounded-xl bg-white/40 p-6 text-center">
                 {col.emptyIcon}
                 <p className="text-sm font-semibold text-gray-500">{col.emptyMessage}</p>
-                <p className="text-xs text-gray-400 mt-1">Los nuevos pedidos aparecerán aquí automáticamente.</p>
+                <p className="text-xs text-gray-400 mt-1">{t('col_empty_footer')}</p>
               </div>
             ) : (
               col.list.map((order) => (

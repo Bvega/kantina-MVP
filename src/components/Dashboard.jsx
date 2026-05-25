@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   subscribeToActiveOrders, 
   subscribeToCompletedOrders, 
@@ -31,6 +32,7 @@ import {
  */
 export default function Dashboard() {
   const { user, logout, isMock } = useAuth();
+  const { t, language, toggleLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState('active');
   const [activeOrders, setActiveOrders] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
@@ -137,7 +139,7 @@ export default function Dashboard() {
   // Helper to simulate receiving a new order (for demo / testing)
   const handleSimulateIncomingOrder = async () => {
     if (menuItems.length === 0) {
-      alert('Primero agrega algunos platillos a tu menú.');
+      alert(t('demo_mode_menu_warning'));
       return;
     }
 
@@ -150,7 +152,7 @@ export default function Dashboard() {
     // Choose 1-3 random items from menu
     const availableItems = menuItems.filter(i => i.available);
     if (availableItems.length === 0) {
-      alert('Debes tener al menos un platillo disponible para recibir un pedido.');
+      alert(t('demo_mode_available_warning'));
       return;
     }
 
@@ -191,7 +193,7 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center bg-orange-50">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-          <p className="mt-4 text-gray-600 font-medium">Cargando datos del panel...</p>
+          <p className="mt-4 text-gray-600 font-medium">{t('nav_loading')}</p>
         </div>
       </div>
     );
@@ -212,7 +214,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <span className="text-2xl">🍽️</span>
               <span className="font-black text-xl text-gray-900 tracking-tight">
-                Kantina<span className="text-orange-600">Panel</span>
+                Kantina<span className="text-orange-600">{t('nav_logo_panel')}</span>
               </span>
             </div>
 
@@ -224,24 +226,34 @@ export default function Dashboard() {
                 <span>{user?.email}</span>
               </div>
 
+              {/* Language Toggle */}
+              <button 
+                onClick={toggleLanguage}
+                className="px-2.5 py-1.5 text-xs font-bold border border-gray-200 hover:bg-gray-100 rounded-lg transition duration-150 uppercase text-gray-600"
+                aria-label="Toggle language"
+                id="lang-toggle-dashboard"
+              >
+                {language === 'en' ? 'ES' : 'EN'}
+              </button>
+
               {/* Sound Test Button */}
               <button
                 onClick={playNewOrderChime}
                 className="flex items-center gap-1.5 px-3 py-1.5 border border-orange-100 hover:bg-orange-50 text-orange-600 rounded-lg text-xs font-bold transition-colors"
-                title="Probar sonido de notificación"
+                title={t('nav_test_sound')}
               >
                 <Volume2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Probar Sonido</span>
+                <span className="hidden sm:inline">{t('nav_test_sound')}</span>
               </button>
 
               {/* Logout Button */}
               <button
                 onClick={logout}
                 className="flex items-center gap-1.5 px-3 py-1.5 border border-red-100 hover:bg-red-50 text-red-600 rounded-lg text-xs font-bold transition-colors"
-                title="Cerrar Sesión"
+                title={t('nav_logout')}
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Cerrar Sesión</span>
+                <span className="hidden sm:inline">{t('nav_logout')}</span>
               </button>
             </div>
           </div>
@@ -253,14 +265,14 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-2 px-4 shadow-sm text-center text-xs font-bold flex flex-wrap items-center justify-center gap-3">
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 animate-pulse" />
-            <span>Modo Demostración activo: Los datos se guardan de forma local en tu navegador.</span>
+            <span>{t('demo_mode_notice')}</span>
           </div>
           <button
             onClick={handleSimulateIncomingOrder}
             className="flex items-center gap-1 bg-white text-orange-700 hover:bg-orange-50 px-3 py-0.5 rounded-full text-xxs font-black transition-all shadow"
           >
             <PlusCircle className="w-3 h-3" />
-            Simular Pedido Entrante
+            {t('demo_mode_btn')}
           </button>
         </div>
       )}
@@ -270,18 +282,18 @@ export default function Dashboard() {
         {/* Short summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pedidos en Curso</div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stats_active')}</div>
             <div className="text-3xl font-black text-gray-900 mt-1">{activeOrders.length}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ventas del Día</div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stats_earnings')}</div>
             <div className="text-3xl font-black text-emerald-600 mt-1 flex items-baseline">
               <DollarSign className="w-5 h-5 -mr-1.5 shrink-0 self-center text-emerald-500" />
               <span>{dailyEarnings.toFixed(2)}</span>
             </div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pedidos Completados</div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stats_completed')}</div>
             <div className="text-3xl font-black text-gray-900 mt-1">
               {completedOrders.filter(o => o.status === 'completed').length}
             </div>
@@ -300,7 +312,7 @@ export default function Dashboard() {
               }`}
             >
               <ClipboardList className="w-4 h-4 mr-2" />
-              Pedidos Activos
+              {t('tab_active')}
             </button>
             
             <button
@@ -312,7 +324,7 @@ export default function Dashboard() {
               }`}
             >
               <History className="w-4 h-4 mr-2" />
-              Historial
+              {t('tab_history')}
             </button>
 
             <button
@@ -324,7 +336,7 @@ export default function Dashboard() {
               }`}
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              Mi Menú
+              {t('tab_menu')}
             </button>
 
             <button
@@ -336,7 +348,7 @@ export default function Dashboard() {
               }`}
             >
               <QrCode className="w-4 h-4 mr-2" />
-              Código QR
+              {t('tab_qrcode')}
             </button>
           </nav>
         </div>
@@ -353,27 +365,27 @@ export default function Dashboard() {
           {activeTab === 'history' && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-800">Historial de Pedidos</h3>
-                <p className="text-xs text-gray-500">Listado de pedidos completados o cancelados del día.</p>
+                <h3 className="text-lg font-bold text-gray-800">{t('history_title')}</h3>
+                <p className="text-xs text-gray-500">{t('history_subtitle')}</p>
               </div>
 
               {completedOrders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center text-gray-400">
                   <History className="w-10 h-10 mb-2 text-gray-300" />
-                  <p className="font-semibold">Sin historial acumulado hoy</p>
-                  <p className="text-xs mt-1">Los pedidos completados se trasladarán a esta pestaña.</p>
+                  <p className="font-semibold">{t('history_empty')}</p>
+                  <p className="text-xs mt-1">{t('history_empty_desc')}</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto border border-gray-100 rounded-2xl">
                   <table className="min-w-full divide-y divide-gray-100 text-left text-sm text-gray-700 bg-white">
                     <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase tracking-wider">
                       <tr>
-                        <th className="px-6 py-3">ID</th>
-                        <th className="px-6 py-3">Cliente</th>
-                        <th className="px-6 py-3">Detalle</th>
-                        <th className="px-6 py-3">Total</th>
-                        <th className="px-6 py-3">Estado</th>
-                        <th className="px-6 py-3 text-right">Hora</th>
+                        <th className="px-6 py-3">{t('history_th_id')}</th>
+                        <th className="px-6 py-3">{t('history_th_customer')}</th>
+                        <th className="px-6 py-3">{t('history_th_details')}</th>
+                        <th className="px-6 py-3">{t('history_th_total')}</th>
+                        <th className="px-6 py-3">{t('history_th_status')}</th>
+                        <th className="px-6 py-3 text-right">{t('history_th_time')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 font-medium text-gray-800">
@@ -391,7 +403,7 @@ export default function Dashboard() {
                                 ? 'bg-emerald-100 text-emerald-800' 
                                 : 'bg-red-100 text-red-800'
                             }`}>
-                              {order.status === 'completed' ? 'Completado' : 'Cancelado'}
+                              {order.status === 'completed' ? t('history_status_completed') : t('history_status_cancelled')}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right text-xs text-gray-400 font-semibold">

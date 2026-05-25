@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Mail, Lock, AlertCircle, ChefHat } from 'lucide-react';
 
 /**
@@ -13,6 +14,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   
   const { user, login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -25,7 +27,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setError('Por favor llena todos los campos.');
+      setError(t('login_err_fields'));
       return;
     }
 
@@ -37,15 +39,15 @@ export default function Login() {
       if (signedInUser) {
         navigate('/dashboard');
       } else {
-        // Translate common Firebase errors to Spanish
+        // Translate common Firebase errors
         if (authError.includes('auth/invalid-credential') || authError.includes('auth/wrong-password') || authError.includes('auth/user-not-found')) {
-          setError('Credenciales incorrectas. Intenta de nuevo.');
+          setError(t('login_err_credential'));
         } else {
-          setError(authError || 'Ocurrió un error al iniciar sesión.');
+          setError(authError || t('login_err_credential'));
         }
       }
     } catch (err) {
-      setError('Error de conexión. Intenta más tarde.');
+      setError(t('login_err_connection'));
     } finally {
       setSubmitting(false);
     }
@@ -60,8 +62,8 @@ export default function Login() {
           <div className="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-white mb-3 shadow-md shadow-orange-600/20">
             <ChefHat className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">Iniciar Sesión</h2>
-          <p className="text-xs font-semibold text-gray-400 mt-1">Panel de Control de Vendedores</p>
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight">{t('login_title')}</h2>
+          <p className="text-xs font-semibold text-gray-400 mt-1">{t('login_subtitle')}</p>
         </div>
 
         {/* Error Banner */}
@@ -75,7 +77,7 @@ export default function Login() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Correo Electrónico</label>
+            <label className="block text-xs font-bold text-gray-600 mb-1">{t('login_label_email')}</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
                 <Mail className="w-4 h-4" />
@@ -93,7 +95,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Contraseña</label>
+            <label className="block text-xs font-bold text-gray-600 mb-1">{t('login_label_password')}</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
                 <Lock className="w-4 h-4" />
@@ -118,7 +120,7 @@ export default function Login() {
             {submitting ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
             ) : (
-              'Ingresar a mi Kantina'
+              t('login_btn_submit')
             )}
           </button>
         </form>
@@ -126,7 +128,7 @@ export default function Login() {
         {/* Footer info */}
         <div className="text-center mt-6 pt-4 border-t border-gray-100">
           <Link to="/" className="text-xs font-bold text-orange-600 hover:text-orange-700">
-            ← Volver al Inicio
+            {t('login_back')}
           </Link>
         </div>
 

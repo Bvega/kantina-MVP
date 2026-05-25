@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { subscribeToOrder } from '../services/orders';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Clock, 
   ChefHat, 
@@ -21,6 +22,7 @@ export default function OrderStatus() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth() || {};
+  const { t } = useLanguage();
 
   useEffect(() => {
     const unsubscribe = subscribeToOrder(orderId, (updatedOrder) => {
@@ -35,7 +37,7 @@ export default function OrderStatus() {
       <div className="min-h-screen flex items-center justify-center bg-orange-50/50">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-          <p className="mt-4 text-sm font-semibold text-gray-500">Cargando estado del pedido...</p>
+          <p className="mt-4 text-sm font-semibold text-gray-500">{t('nav_loading')}</p>
         </div>
       </div>
     );
@@ -45,12 +47,12 @@ export default function OrderStatus() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-orange-50/50 p-6 text-center">
         <HelpCircle className="w-16 h-16 text-orange-300 mb-4" />
-        <h2 className="text-xl font-bold text-gray-800">Pedido no encontrado</h2>
+        <h2 className="text-xl font-bold text-gray-800">{t('status_not_found_title')}</h2>
         <p className="text-sm text-gray-500 mt-1 max-w-sm">
-          No pudimos localizar la orden especificada. Por favor verifica el enlace o contacta al vendedor.
+          {t('status_not_found_desc')}
         </p>
         <Link to="/" className="mt-6 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition">
-          Ir al Inicio
+          {t('status_not_found_btn')}
         </Link>
       </div>
     );
@@ -60,9 +62,9 @@ export default function OrderStatus() {
 
   // Timeline steps definitions
   const steps = [
-    { key: 'pending', label: 'Recibido', desc: 'Enviado a la cocina, en espera de confirmación.', icon: <Clock className="w-5 h-5" /> },
-    { key: 'preparing', label: 'Cocinando', desc: '¡Tu pedido se está preparando en este momento!', icon: <ChefHat className="w-5 h-5" /> },
-    { key: 'ready', label: 'Listo', desc: '¡Buenísimo! Pasa a recoger tu pedido.', icon: <Bell className="w-5 h-5" /> }
+    { key: 'pending', label: t('status_step_received'), desc: t('status_step_received_desc'), icon: <Clock className="w-5 h-5" /> },
+    { key: 'preparing', label: t('status_step_cooking'), desc: t('status_step_cooking_desc'), icon: <ChefHat className="w-5 h-5" /> },
+    { key: 'ready', label: t('status_step_ready'), desc: t('status_step_ready_desc'), icon: <Bell className="w-5 h-5" /> }
   ];
 
   // Helper to determine step visual styling
@@ -86,21 +88,21 @@ export default function OrderStatus() {
         <div className="text-center border-b border-gray-100 pb-5">
           {order && (
             <Link to={`/menu/${order.vendorId}`} className="text-xs font-bold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1 mb-2">
-              ← Volver al Menú
+              {t('status_back_menu')}
             </Link>
           )}
-          <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider">Seguimiento de Pedido</span>
-          <h2 className="text-xl font-bold text-gray-900 mt-1">Orden #{id}</h2>
-          <p className="text-sm font-semibold text-gray-600 mt-0.5">Cliente: {customerName}</p>
+          <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider">{t('status_header_label')}</span>
+          <h2 className="text-xl font-bold text-gray-900 mt-1">{t('order_id')} #{id}</h2>
+          <p className="text-sm font-semibold text-gray-600 mt-0.5">{t('history_th_customer')}: {customerName}</p>
         </div>
 
         {/* Canceled State view */}
         {status === 'cancelled' && (
           <div className="bg-red-50 border border-red-100 rounded-2xl p-5 text-center space-y-2">
             <XCircle className="w-12 h-12 text-red-500 mx-auto" />
-            <h3 className="font-bold text-red-800 text-base">Pedido Cancelado</h3>
+            <h3 className="font-bold text-red-800 text-base">{t('status_stage_cancelled')}</h3>
             <p className="text-xs text-red-600 font-medium">
-              Lo sentimos, tu pedido ha sido cancelado por el puesto. Por favor acércate al mostrador para más información.
+              {t('status_stage_cancelled_desc')}
             </p>
           </div>
         )}
@@ -109,9 +111,9 @@ export default function OrderStatus() {
         {status === 'completed' && (
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center space-y-2">
             <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
-            <h3 className="font-bold text-emerald-800 text-base">¡Pedido Entregado!</h3>
+            <h3 className="font-bold text-emerald-800 text-base">{t('status_stage_delivered')}</h3>
             <p className="text-xs text-emerald-600 font-medium">
-              ¡Muchas gracias por tu compra! Esperamos que disfrutes tu comida. ¡Buen provecho!
+              {t('status_stage_delivered_desc')}
             </p>
           </div>
         )}
@@ -154,7 +156,7 @@ export default function OrderStatus() {
 
         {/* Order Recap details */}
         <div className="border-t border-gray-100 pt-5">
-          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detalle de tu orden</h4>
+          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{t('status_details_title')}</h4>
           
           <div className="divide-y divide-gray-50 pb-3">
             {items.map((item, idx) => (
@@ -176,17 +178,17 @@ export default function OrderStatus() {
           )}
 
           <div className="flex justify-between items-center text-sm font-semibold text-gray-500 pt-3 border-t border-gray-100">
-            <span>Total Cobrado</span>
+            <span>{t('order_total')}</span>
             <span className="text-lg font-black text-gray-900">${total.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Support helper */}
         <div className="text-center text-[10px] text-gray-400 font-semibold bg-gray-50 rounded-xl p-3 border border-gray-100">
-          <div>📍 Por favor, no cierres esta pestaña. Se actualizará sola cuando tu comida esté lista.</div>
+          <div>{t('status_footer_notice')}</div>
           {user && (
             <Link to="/dashboard" className="mt-2 pt-2 border-t border-gray-100 block text-xs font-bold text-orange-600 hover:text-orange-700">
-              Ir al Dashboard de Vendedor →
+              {t('status_back_dashboard')}
             </Link>
           )}
         </div>

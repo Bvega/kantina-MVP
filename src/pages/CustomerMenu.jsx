@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getVendorMenu, createOrder } from '../services/orders';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   ShoppingBag, 
   Plus, 
@@ -13,6 +14,25 @@ import {
   ChefHat 
 } from 'lucide-react';
 
+const categoryTranslations = {
+  en: {
+    'Tacos': 'Tacos',
+    'Quesadillas': 'Quesadillas',
+    'Gorditas': 'Gorditas',
+    'Bebidas': 'Drinks',
+    'Postres': 'Desserts',
+    'Otros': 'Others'
+  },
+  es: {
+    'Tacos': 'Tacos',
+    'Quesadillas': 'Quesadillas',
+    'Gorditas': 'Gorditas',
+    'Bebidas': 'Bebidas',
+    'Postres': 'Postres',
+    'Otros': 'Otros'
+  }
+};
+
 /**
  * CustomerMenu is a public page that lets clients browse the vendor's menu,
  * customize an order, and submit it directly to the kitchen.
@@ -20,6 +40,7 @@ import {
 export default function CustomerMenu() {
   const { vendorId } = useParams();
   const navigate = useNavigate();
+  const { t, language, toggleLanguage } = useLanguage();
   
   const [menuItems, setMenuItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('Todos');
@@ -44,6 +65,11 @@ export default function CustomerMenu() {
 
   // Extract unique categories
   const categories = ['Todos', ...new Set(menuItems.map(item => item.category))];
+
+  const getLocalizedCategory = (cat) => {
+    if (cat === 'Todos') return t('customer_menu_todos');
+    return categoryTranslations[language]?.[cat] || cat;
+  };
 
   const handleAddToCart = (item) => {
     setCart(prev => {
@@ -79,7 +105,7 @@ export default function CustomerMenu() {
     e.preventDefault();
     if (cartTotalItems === 0) return;
     if (!customerName.trim()) {
-      alert('Por favor ingresa tu nombre o número de mesa.');
+      alert(t('customer_err_name'));
       return;
     }
 
@@ -101,10 +127,10 @@ export default function CustomerMenu() {
         // Redirect to live order tracking screen
         navigate(`/order-status/${result.orderId}`);
       } else {
-        alert('Hubo un problema al crear tu pedido: ' + result.error);
+        alert(t('customer_err_create', { error: result.error }));
       }
     } catch (err) {
-      alert('Error de conexión. Intenta de nuevo.');
+      alert(t('customer_err_connection'));
     } finally {
       setSubmitting(false);
     }
@@ -119,7 +145,7 @@ export default function CustomerMenu() {
       <div className="min-h-screen flex items-center justify-center bg-orange-50/50">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-          <p className="mt-4 text-sm font-semibold text-gray-500">Cargando menú delicioso...</p>
+          <p className="mt-4 text-sm font-semibold text-gray-500">{t('nav_loading')}</p>
         </div>
       </div>
     );
@@ -129,12 +155,20 @@ export default function CustomerMenu() {
     <div className="min-h-screen bg-gray-50 flex flex-col relative pb-20 sm:pb-0">
       
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-orange-500 to-terracotta-600 text-white py-8 px-6 text-center shadow-md">
+      <div className="bg-gradient-to-br from-orange-500 to-terracotta-600 text-white py-8 px-6 text-center shadow-md relative">
+        <button 
+          onClick={toggleLanguage}
+          className="absolute top-4 right-4 px-2.5 py-1 text-xs font-bold border border-white/20 hover:bg-white/10 rounded-lg transition duration-150 uppercase text-white shadow-sm"
+          aria-label="Toggle language"
+          id="lang-toggle-customer"
+        >
+          {language === 'en' ? 'ES' : 'EN'}
+        </button>
         <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white mb-2 mx-auto">
           <ChefHat className="w-5 h-5" />
         </div>
-        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight">KANTINA MENU</h1>
-        <p className="text-xs font-semibold opacity-90 mt-0.5">Pide al instante en un par de clics</p>
+        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight">{t('customer_menu_tag')}</h1>
+        <p className="text-xs font-semibold opacity-90 mt-0.5">{t('customer_menu_sub')}</p>
       </div>
 
       {/* Categories Horizontal Carousel */}
@@ -149,7 +183,7 @@ export default function CustomerMenu() {
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
             }`}
           >
-            {cat}
+            {getLocalizedCategory(cat)}
           </button>
         ))}
       </div>
@@ -159,8 +193,8 @@ export default function CustomerMenu() {
         {filteredItems.length === 0 ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <ShoppingBag className="w-10 h-10 mx-auto text-gray-300 mb-2" />
-            <p className="font-semibold text-sm">Menú no disponible por el momento</p>
-            <p className="text-xs text-gray-400 mt-1">El vendedor no ha habilitado platillos en esta sección.</p>
+            <p className="font-semibold text-sm">{t('customer_menu_empty')}</p>
+            <p className="text-xs text-gray-400 mt-1">{t('customer_menu_empty_desc')}</p>
           </div>
         ) : (
           filteredItems.map((item) => (
@@ -214,7 +248,7 @@ export default function CustomerMenu() {
           >
             <div className="flex items-center gap-2 text-sm">
               <ShoppingBag className="w-5 h-5" />
-              <span>Ver Pedido</span>
+              <span>{t('customer_cart_bar')}</span>
               <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-black">
                 {cartTotalItems}
               </span>
@@ -240,7 +274,7 @@ export default function CustomerMenu() {
               <div className="flex justify-between items-center pb-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-orange-600" />
-                  <h2 className="text-lg font-bold text-gray-800">Mi Orden</h2>
+                  <h2 className="text-lg font-bold text-gray-800">{t('customer_cart_title')}</h2>
                 </div>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -290,12 +324,12 @@ export default function CustomerMenu() {
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-1 flex items-center">
                   <User className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                  ¿A nombre de quién? / Mesa
+                  {t('customer_form_name')}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej. Juan Pérez (Mesa 4)"
+                  placeholder={t('customer_form_name_placeholder')}
                   className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-500 bg-white"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
@@ -307,10 +341,10 @@ export default function CustomerMenu() {
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-1 flex items-center">
                   <Clipboard className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                  Instrucciones especiales (opcional)
+                  {t('customer_form_notes')}
                 </label>
                 <textarea
-                  placeholder="Ej. Sin cebolla, salsa extra, servilletas..."
+                  placeholder={t('customer_form_notes_placeholder')}
                   rows={2}
                   className="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-500 bg-white resize-none"
                   value={notes}
@@ -322,15 +356,15 @@ export default function CustomerMenu() {
               {/* Pricing breakdown */}
               <div className="space-y-1.5 text-sm font-semibold text-gray-500 pt-2">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>{t('customer_subtotal')}</span>
                   <span>${cartTotalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-emerald-600">
-                  <span>Método de pago</span>
-                  <span>Efectivo al Recibir</span>
+                  <span>{t('customer_form_payment_method')}</span>
+                  <span>{t('customer_form_payment_val')}</span>
                 </div>
                 <div className="flex justify-between text-lg font-black text-gray-900 border-t border-gray-100 pt-2 mt-1">
-                  <span>Total</span>
+                  <span>{t('customer_total')}</span>
                   <span>${cartTotalPrice.toFixed(2)}</span>
                 </div>
               </div>
@@ -344,7 +378,7 @@ export default function CustomerMenu() {
                 {submitting ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                 ) : (
-                  'Confirmar Pedido 🍽️'
+                  t('customer_form_btn_confirm')
                 )}
               </button>
             </form>

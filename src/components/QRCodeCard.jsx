@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download, Share2, Printer, Check } from 'lucide-react';
 
@@ -6,6 +7,7 @@ import { Download, Share2, Printer, Check } from 'lucide-react';
  * QRCodeCard renders a scannable QR Code linking to the vendor's mobile ordering menu.
  */
 export default function QRCodeCard({ vendorId }) {
+  const { t } = useLanguage();
   const qrRef = useRef(null);
   
   // Construct customer menu URL
@@ -54,31 +56,31 @@ export default function QRCodeCard({ vendorId }) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Mi Menú en Kantina',
-        text: 'Escanea para ordenar directamente desde tu celular.',
+        title: 'Kantina Menu',
+        text: t('qr_frame_subtitle'),
         url: menuUrl,
       })
-      .then(() => console.log('Compartido con éxito'))
-      .catch((error) => console.log('Error al compartir', error));
+      .then(() => console.log('Shared successfully'))
+      .catch((error) => console.log('Error sharing', error));
     } else {
       // Copy to clipboard fallback
       navigator.clipboard.writeText(menuUrl);
-      alert('¡Enlace de menú copiado al portapapeles!');
+      alert(t('qr_copied_alert'));
     }
   };
 
   return (
     <div className="max-w-md mx-auto space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-800">Código QR del Menú</h2>
-        <p className="text-sm text-gray-500">Muestra o imprime este código QR para que tus clientes hagan pedidos.</p>
+        <h2 className="text-xl font-bold text-gray-800">{t('qr_title')}</h2>
+        <p className="text-sm text-gray-500">{t('qr_subtitle')}</p>
       </div>
 
       <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col items-center">
         {/* Poster Frame Mockup */}
         <div className="w-full bg-gradient-to-br from-orange-500 to-terracotta-600 rounded-2xl p-6 text-white text-center shadow-inner flex flex-col items-center">
-          <span className="text-2xl font-black tracking-wider mb-1">🍽️ KANTINA</span>
-          <p className="text-xs font-semibold opacity-90 mb-5">ESCANEA Y PIDE DESDE TU MÓVIL</p>
+          <span className="text-2xl font-black tracking-wider mb-1">🍽️ {t('qr_frame_title')}</span>
+          <p className="text-xs font-semibold opacity-90 mb-5">{t('qr_frame_subtitle')}</p>
           
           {/* QR Container */}
           <div className="bg-white p-4 rounded-xl shadow-md inline-block">
@@ -99,12 +101,12 @@ export default function QRCodeCard({ vendorId }) {
             />
           </div>
           
-          <p className="text-xxs font-bold mt-4 tracking-wider opacity-75 uppercase">Mesa o Puesto #1</p>
+          <p className="text-xxs font-bold mt-4 tracking-wider opacity-75 uppercase">{t('qr_frame_spot')}</p>
         </div>
 
         {/* Link display */}
         <div className="w-full bg-gray-50 rounded-xl p-3 border border-gray-100 text-center select-all cursor-pointer mt-5">
-          <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider mb-0.5">Enlace de tu menú</span>
+          <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider mb-0.5">{t('qr_link_label')}</span>
           <span className="text-xs font-bold text-gray-700 break-all">{menuUrl}</span>
         </div>
 
@@ -115,33 +117,33 @@ export default function QRCodeCard({ vendorId }) {
             className="flex items-center justify-center py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition shadow-sm"
           >
             <Download className="w-4 h-4 mr-2" />
-            Descargar PNG
+            {t('qr_btn_download')}
           </button>
           <button
             onClick={handleShare}
             className="flex items-center justify-center py-2.5 px-4 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-sm rounded-xl transition"
           >
             <Share2 className="w-4 h-4 mr-2" />
-            Compartir Link
+            {t('qr_btn_share')}
           </button>
         </div>
       </div>
 
       {/* Setup Instructions */}
       <div className="bg-orange-50/50 border border-orange-100/80 rounded-2xl p-5 space-y-3.5">
-        <h3 className="font-bold text-orange-950 text-sm">¿Cómo funciona?</h3>
+        <h3 className="font-bold text-orange-950 text-sm">{t('qr_how_title')}</h3>
         <ul className="space-y-2.5 text-xs text-orange-900 font-medium">
           <li className="flex items-start">
             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-orange-200 text-orange-800 text-[10px] font-black mr-2 shrink-0">1</span>
-            <span>Descarga e imprime el código QR en papel o calcomanías.</span>
+            <span>{t('qr_how_step_1')}</span>
           </li>
           <li className="flex items-start">
             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-orange-200 text-orange-800 text-[10px] font-black mr-2 shrink-0">2</span>
-            <span>Colócalo visible en tus mesas, barra o en tu puesto de comida.</span>
+            <span>{t('qr_how_step_2')}</span>
           </li>
           <li className="flex items-start">
             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-orange-200 text-orange-800 text-[10px] font-black mr-2 shrink-0">3</span>
-            <span>Tus clientes escanean el código con su celular, ven el menú y ordenan al instante. ¡Recibirás las notificaciones aquí!</span>
+            <span>{t('qr_how_step_3')}</span>
           </li>
         </ul>
       </div>

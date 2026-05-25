@@ -9,28 +9,31 @@ import CustomerMenu from "./pages/CustomerMenu.jsx";
 import OrderStatus from "./pages/OrderStatus.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { LanguageProvider } from "./context/LanguageContext.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <VendorDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/menu/:vendorId" element={<CustomerMenu />} />
-          <Route path="/order-status/:orderId" element={<OrderStatus />} />
-          <Route path="/test" element={<App />} /> {/* Optional test page */}
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <VendorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/menu/:vendorId" element={<CustomerMenu />} />
+            <Route path="/order-status/:orderId" element={<OrderStatus />} />
+            <Route path="/test" element={<App />} /> {/* Optional test page */}
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
   </React.StrictMode>
 );

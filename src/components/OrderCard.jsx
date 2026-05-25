@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import { Clock, ChefHat, CheckCircle2, Trash2, Coins, MessageSquare, Check } from 'lucide-react';
 
 /**
  * Formats time elapsed from a given ISO string or Timestamp.
  */
-function formatTimeElapsed(dateStr) {
+function formatTimeElapsed(dateStr, t) {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   const diffMs = Date.now() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   
-  if (diffMins < 1) return 'Hace un momento';
-  if (diffMins < 60) return `Hace ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+  if (diffMins < 1) return t('order_time_moment');
+  if (diffMins < 60) return t('order_time_mins').replace('X', diffMins);
   
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `Hace ${diffHours} hr${diffHours > 1 ? 's' : ''}`;
+  if (diffHours < 24) return t('order_time_hours').replace('X', diffHours);
   
   return date.toLocaleDateString();
 }
@@ -23,15 +24,16 @@ function formatTimeElapsed(dateStr) {
  * OrderCard displays details for a single order and triggers status updates.
  */
 export default function OrderCard({ order, onStatusUpdate }) {
+  const { t } = useLanguage();
   const [elapsed, setElapsed] = useState('');
 
   useEffect(() => {
-    setElapsed(formatTimeElapsed(order.createdAt));
+    setElapsed(formatTimeElapsed(order.createdAt, t));
     const timer = setInterval(() => {
-      setElapsed(formatTimeElapsed(order.createdAt));
+      setElapsed(formatTimeElapsed(order.createdAt, t));
     }, 30000); // Update every 30 seconds
     return () => clearInterval(timer);
-  }, [order.createdAt]);
+  }, [order.createdAt, t]);
 
   const { id, customerName, items, total, status, notes } = order;
 
@@ -41,8 +43,8 @@ export default function OrderCard({ order, onStatusUpdate }) {
       bg: 'bg-amber-50',
       border: 'border-amber-200',
       badgeBg: 'bg-amber-100 text-amber-800',
-      badgeText: 'Pendiente',
-      btnText: 'Preparar',
+      badgeText: t('status_step_received'),
+      btnText: t('order_btn_prepare'),
       btnBg: 'bg-amber-600 hover:bg-amber-700 text-white',
       btnIcon: <ChefHat className="w-4 h-4 mr-2" />,
       nextStatus: 'preparing'
@@ -51,8 +53,8 @@ export default function OrderCard({ order, onStatusUpdate }) {
       bg: 'bg-blue-50',
       border: 'border-blue-200',
       badgeBg: 'bg-blue-100 text-blue-800',
-      badgeText: 'Preparando',
-      btnText: 'Listo',
+      badgeText: t('status_step_cooking'),
+      btnText: t('order_btn_ready'),
       btnBg: 'bg-blue-600 hover:bg-blue-700 text-white',
       btnIcon: <CheckCircle2 className="w-4 h-4 mr-2" />,
       nextStatus: 'ready'
@@ -61,8 +63,8 @@ export default function OrderCard({ order, onStatusUpdate }) {
       bg: 'bg-emerald-50',
       border: 'border-emerald-200',
       badgeBg: 'bg-emerald-100 text-emerald-800',
-      badgeText: 'Listo para Entrega',
-      btnText: 'Completar',
+      badgeText: t('status_step_ready'),
+      btnText: t('order_btn_complete'),
       btnBg: 'bg-emerald-600 hover:bg-emerald-700 text-white',
       btnIcon: <Check className="w-4 h-4 mr-2" />,
       nextStatus: 'completed'
@@ -82,7 +84,7 @@ export default function OrderCard({ order, onStatusUpdate }) {
       <div>
         <div className="flex justify-between items-start mb-3">
           <div>
-            <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider">Orden #{id}</span>
+            <span className="text-xs font-semibold text-gray-400 block uppercase tracking-wider">{t('order_id')} #{id}</span>
             <h3 className="text-lg font-bold text-gray-800 mt-0.5">{customerName}</h3>
           </div>
           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${style.badgeBg}`}>
@@ -123,7 +125,7 @@ export default function OrderCard({ order, onStatusUpdate }) {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center text-sm font-semibold text-gray-500">
             <Coins className="w-4 h-4 mr-1 text-gray-400" />
-            Total Cobrado
+            {t('order_total')}
           </div>
           <span className="text-xl font-black text-gray-900">${total.toFixed(2)}</span>
         </div>
@@ -144,7 +146,7 @@ export default function OrderCard({ order, onStatusUpdate }) {
           {(status === 'pending' || status === 'preparing') && (
             <button
               onClick={() => onStatusUpdate(id, 'cancelled')}
-              title="Cancelar Pedido"
+              title={t('order_btn_cancel_title')}
               className="p-2 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors duration-200"
             >
               <Trash2 className="w-4 h-4" />
